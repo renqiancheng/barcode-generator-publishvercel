@@ -48,7 +48,7 @@ export default async function RootLayout({
     notFound()
   }
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning className="dark">
       <head />
       <body
         className={cn(
@@ -57,7 +57,7 @@ export default async function RootLayout({
           inter.className,
         )}
       >
-        <ThemeProvider attribute="class" defaultTheme="dark">
+        <ThemeProvider attribute="class" forcedTheme="dark">
           <NextIntlClientProvider locale={locale} messages={messages}>
             <div className="relative flex min-h-screen flex-col">
               {children}
