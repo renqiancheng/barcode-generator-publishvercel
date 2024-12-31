@@ -1,11 +1,12 @@
 import { Metadata } from 'next'
 import { getSiteConfig } from '@/config/site-i18n'
-import { PageProps } from '../layout'
 
 export async function generateMetadata({
-  params: { locale },
-}: PageProps): Promise<Metadata> {
-  const siteConfig = getSiteConfig(locale)
+  params,
+}: {
+  params: { locale: string }
+}): Promise<Metadata> {
+  const siteConfig = getSiteConfig(params.locale)
   return {
     title: `Terms and Privacy - ${siteConfig.name}`,
     description: 'Terms of Use and Privacy Policy',
