@@ -3,7 +3,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import { Copy, Printer, Sliders } from 'lucide-react'
+import { Copy, Printer, Sliders, Lock } from 'lucide-react'
 import { useBarcodeContext } from './BarcodeContext'
 
 import { useTranslations } from 'next-intl'
@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { lockHeight } from '@/config/barcode-types'
 
 const LayoutSelector: React.FC<{
   onLayoutChange: (layout: string) => void
@@ -185,8 +186,27 @@ export const OptionsComponent: React.FC = () => {
     setShowText,
     barcodeMargin,
     setBarcodeMargin,
+    codeFormat,
   } = useBarcodeContext()
   const t = useTranslations('Barcode')
+
+  // 检查是否是二维码类型
+  const isLockHeight = lockHeight(codeFormat)
+
+  // 当条形码宽度改变且是二维码时，自动设置高度等于宽度
+  React.useEffect(() => {
+    if (isLockHeight) {
+      setBarcodeHeight(barcodeLength)
+    }
+  }, [barcodeLength, isLockHeight, setBarcodeHeight])
+
+  // 处理宽度变化
+  const handleLengthChange = (value: number) => {
+    setBarcodeLength(value)
+    if (isLockHeight) {
+      setBarcodeHeight(value)
+    }
+  }
 
   return (
     <div>
@@ -196,8 +216,8 @@ export const OptionsComponent: React.FC = () => {
         </span>
       </div>
 
-      <div className="xs:text-sm rounded-md  bg-transparent p-3 text-xs shadow-sm">
-        <div className="grid grid-cols-1 gap-2 ">
+      <div className="xs:text-sm rounded-md bg-transparent p-3 text-xs shadow-sm">
+        <div className="grid grid-cols-1 gap-2">
           <div className="md:col-span-1">
             <div className="flex items-center justify-between">
               <Label htmlFor="showText" className="text-sm font-medium">
@@ -217,19 +237,32 @@ export const OptionsComponent: React.FC = () => {
               id="barcodeLength"
               type="number"
               value={barcodeLength}
-              onChange={(e) => setBarcodeLength(Number(e.target.value))}
+              onChange={(e) => handleLengthChange(Number(e.target.value))}
               className="bg-white"
             />
           </div>
-          <div className="md:col-span-1">
+          <div className="relative md:col-span-1">
             <Label htmlFor="barcodeHeight">{t('options.barcode-height')}</Label>
-            <Input
-              id="barcodeHeight"
-              type="number"
-              value={barcodeHeight}
-              className="bg-white"
-              onChange={(e) => setBarcodeHeight(Number(e.target.value))}
-            />
+            <div className="relative">
+              <Input
+                id="barcodeHeight"
+                type="number"
+                value={barcodeHeight}
+                className={`bg-white ${isLockHeight ? 'pr-10' : ''}`}
+                onChange={(e) => setBarcodeHeight(Number(e.target.value))}
+                disabled={isLockHeight}
+              />
+              {isLockHeight && (
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
+                  <Lock className="h-4 w-4" />
+                </div>
+              )}
+            </div>
+            {isLockHeight && (
+              <p className="mt-1 text-xs text-gray-500">
+                {t('options.locked-aspect-ratio')}
+              </p>
+            )}
           </div>
           <div className="md:col-span-1">
             <Label htmlFor="barcodeMargin">{t('options.barcode-margin')}</Label>
